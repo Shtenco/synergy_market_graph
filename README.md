@@ -2,6 +2,8 @@
 
 > **Graph fair value, executable-cycle discovery and causal/relative-value market representation**
 
+Version: `2.0.0`
+
 **Enterprise v2.0.0** · Python 3.11+ · FastAPI/OpenAPI · Docker/Compose · RBAC/JWT · PostgreSQL/ClickHouse audit
 
 **Designed for:** Market makers, FX/crypto quant desks, exchanges and liquidity providers  
