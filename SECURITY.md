@@ -1,0 +1,3 @@
+# Security policy — SYNERGY Market Graph
+
+No production secrets in Git. Prefer customer OIDC/mTLS/JWKS, least-privilege credentials, KMS-backed secrets and restricted DB/venue networks. PostgreSQL is authoritative audit; ClickHouse is analytical mirror. Request IDs are correlation evidence, not auth/idempotency secrets. Graph-discovered opportunities are research artifacts; no automatic live execution is implied. No security/regulatory certification is claimed.
