@@ -1,0 +1,3 @@
+# Customer pilot — SYNERGY Market Graph
+
+Objective: demonstrate graph-based fair-value and bounded cycle analysis on customer-approved market data. Freeze universe, edge semantics, max hops and acceptance criteria before results. Run synthetic → historical/paper → operational resilience. Validate discovered cycles against independent venue quotes and settlement constraints; do not equate arithmetic cycles with guaranteed executable profit.
