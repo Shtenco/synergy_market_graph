@@ -60,3 +60,70 @@ README должен показывать: проблему → архитект�
 Репозиторий не присваивает полномочия соседнего домена: AI ≠ authorization, UI ≠ ledger, blockchain commitment ≠ accounting truth, backtest ≠ realized external P&L.
 
 <!-- SYNERGY-FEDERATION-PASSPORT:END -->
+---
+
+# 🕸️ Глубокая техническая спецификация Market Graph
+
+## 🎯 Проблема
+
+Арифметический цикл или graph fair value не равен исполнимому арбитражу. Нужен граф, где ребро содержит цену, объём, стоимость, latency, settlement и evidence.
+
+## 🏗️ Pipeline
+
+```mermaid
+flowchart LR
+    N0[Raw venues / rates] --> N1[Normalize assets + timestamps] --> N2[Build typed graph] --> N3[Discover cycles / relative value] --> N4[Exact repricing at size] --> N5[Capacity + cost filter] --> N6[Candidate artifact]
+```
+
+## 📥 Входы
+
+- quotes/order books;
+- symbol mapping;
+- fees;
+- capacity/depth;
+- latency/settlement;
+- timestamps;
+
+## 📤 Выходы
+
+- typed graph snapshot;
+- fair-value relations;
+- cycle candidates;
+- capacity-limited route;
+- evidence-backed repricing;
+
+## 🛡️ Непереговорные инварианты
+
+```text
+AlphaGraph != RebalancingGraph
+no stale edge in executable route
+cycle profit must be net of all modeled costs
+shared edge capacity cannot be double-used
+candidate != executed arbitrage
+```
+
+## 🧪 Как ловить ложный GREEN
+
+- отделять API/health benchmark от качества торгового решения;
+- проверять stale-state и timestamp binding;
+- иметь negative/adversarial tests;
+- не считать unit-test coverage доказательством инвестиционной ценности;
+- сохранять request → decision → downstream evidence chain;
+- явно указывать, что измерено локально, а что требует customer/live validation.
+
+## 🔗 Контракт с соседями
+
+- [`synergy_algotrading_graph_system`](https://github.com/Shtenco/synergy_algotrading_graph_system)
+- [`synergy_relative_value`](https://github.com/Shtenco/synergy_relative_value)
+- [`synergy_trademux`](https://github.com/Shtenco/synergy_trademux)
+- [`synergy_pay_system`](https://github.com/Shtenco/synergy_pay_system)
+
+## 🚀 Следующий доказательный рубеж
+
+1. frozen acceptance dataset;
+2. adversarial fixtures;
+3. cross-module typed contract;
+4. end-to-end trace id;
+5. OOS/shadow evidence where market quality is claimed;
+6. explicit failure-mode table;
+7. reproducible evidence bundle referenced from README.
