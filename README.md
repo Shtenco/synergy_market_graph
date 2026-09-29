@@ -1,129 +1,282 @@
-# SYNERGY Market Graph
+# 🕸️ SYNERGY Market Graph — verified technical dossier
 
-> **Graph fair value, executable-cycle discovery and causal/relative-value market representation**
+> **Статус:** 🟡 CANDIDATE — executable graph model, typed fair-value contract, enterprise API and tests exist.
+> **Проверено по `main`:** 29.09.2026.
 
-Version: `2.0.0`
+## 1. 🎯 Задача
 
-**Enterprise v2.0.0** · Python 3.11+ · FastAPI/OpenAPI · Docker/Compose · RBAC/JWT · PostgreSQL/ClickHouse audit
+`synergy_market_graph` представляет рынок как направленный graph executable conversion edges и вычисляет multi-path fair value после fees/slippage.
 
-**Designed for:** Market makers, FX/crypto quant desks, exchanges and liquidity providers  
-**Primary endpoint:** `POST /enterprise/v1/graph/analyze`
-
-> [!IMPORTANT]
-> Graph-derived fair value/cycles are research evidence. They do not guarantee executable arbitrage, fills or profit.
-
-## Institutional package
-Deterministic graph core · tenant RBAC · request-ID audit · health/metrics · Docker/Compose · demo/load harnesses · customer pilot documentation.
-
-## Verification
-**20 tests passed** · health smoke **80/80 200** · local p95 **87.7 ms** (~526 req/s). Health smoke only.
-
-## Quick start
-```bash
-pip install -e '.[dev,enterprise]'
-pytest -q
-python -m synergy_market_graph.api
-```
-
-## CTO package
-[Due diligence](docs/CTO_DUE_DILIGENCE.md) · [Architecture](docs/ARCHITECTURE_DIAGRAMS.md) · [API](docs/API_EXAMPLES.md) · [Security](SECURITY.md) · [Benchmarks](docs/BENCHMARKS_AND_ACCEPTANCE.md) · [SLA/SLO](docs/SLA_SLO.md) · [Deployment](docs/DEPLOYMENT_CHECKLIST.md) · [Pilot](docs/CUSTOMER_PILOT.md)
-
-
-<!-- SYNERGY-FEDERATION-PASSPORT:START -->
----
-
-## 🧭 SYNERGY federation passport
-
-**Домен:** 🕸️ Market graph  
-**Архитектурный родитель:** [`synergy_midas_ai`](https://github.com/Shtenco/synergy_midas_ai)  
-**Архитектурный корень:** [`synergy_system`](https://github.com/Shtenco/synergy_system)
-
-```mermaid
-flowchart LR
-    SYS[🧭 synergy_system] --> P[synergy_midas_ai]
-    P --> THIS[synergy_market_graph]
-    THIS --> E[📦 Evidence / outputs]
-```
-
-### Документационный контракт
-
-README должен показывать: проблему → архитектуру → реальные артефакты → проверку → ограничения → связи с федерацией. Сильные claims без evidence остаются R&D/CANDIDATE.
-
-### Навигация
-
-- [📚 Атлас всех 75 репозиториев](https://github.com/Shtenco/synergy_system/blob/main/docs/SYNERGY_REPOSITORY_ATLAS.md)
-- [🧾 Машиночитаемый registry](https://github.com/Shtenco/synergy_system/blob/main/registry/SYNERGY_REPOSITORIES.json)
-- [🧭 SYNERGY SYSTEM](https://github.com/Shtenco/synergy_system)
-
-### Authority rule
-
-Репозиторий не присваивает полномочия соседнего домена: AI ≠ authorization, UI ≠ ledger, blockchain commitment ≠ accounting truth, backtest ≠ realized external P&L.
-
-<!-- SYNERGY-FEDERATION-PASSPORT:END -->
----
-
-# 🕸️ Глубокая техническая спецификация Market Graph
-
-## 🎯 Проблема
-
-Арифметический цикл или graph fair value не равен исполнимому арбитражу. Нужен граф, где ребро содержит цену, объём, стоимость, latency, settlement и evidence.
-
-## 🏗️ Pipeline
-
-```mermaid
-flowchart LR
-    N0[Raw venues / rates] --> N1[Normalize assets + timestamps] --> N2[Build typed graph] --> N3[Discover cycles / relative value] --> N4[Exact repricing at size] --> N5[Capacity + cost filter] --> N6[Candidate artifact]
-```
-
-## 📥 Входы
-
-- quotes/order books;
-- symbol mapping;
-- fees;
-- capacity/depth;
-- latency/settlement;
-- timestamps;
-
-## 📤 Выходы
-
-- typed graph snapshot;
-- fair-value relations;
-- cycle candidates;
-- capacity-limited route;
-- evidence-backed repricing;
-
-## 🛡️ Непереговорные инварианты
+Ключевая задача — отделить:
 
 ```text
-AlphaGraph != RebalancingGraph
-no stale edge in executable route
-cycle profit must be net of all modeled costs
-shared edge capacity cannot be double-used
-candidate != executed arbitrage
+quoted rate
+!=
+executable rate
+!=
+multi-path fair value
+!=
+guaranteed arbitrage
 ```
 
-## 🧪 Как ловить ложный GREEN
+## 2. 📦 Фактический состав
 
-- отделять API/health benchmark от качества торгового решения;
-- проверять stale-state и timestamp binding;
-- иметь negative/adversarial tests;
-- не считать unit-test coverage доказательством инвестиционной ценности;
-- сохранять request → decision → downstream evidence chain;
-- явно указывать, что измерено локально, а что требует customer/live validation.
+Repository содержит Python package, enterprise layer, tests, Dockerfile, deployment/loadtest scaffolding, docs/examples и federation contract.
 
-## 🔗 Контракт с соседями
+Ключевые файлы:
 
-- [`synergy_algotrading_graph_system`](https://github.com/Shtenco/synergy_algotrading_graph_system)
-- [`synergy_relative_value`](https://github.com/Shtenco/synergy_relative_value)
-- [`synergy_trademux`](https://github.com/Shtenco/synergy_trademux)
-- [`synergy_pay_system`](https://github.com/Shtenco/synergy_pay_system)
+```text
+src/synergy_market_graph/core.py
+src/synergy_market_graph/api.py
+src/synergy_market_graph/synergy_contracts.py
+tests/test_enterprise_product.py
+...```
 
-## 🚀 Следующий доказательный рубеж
+## 3. 🧠 Core data model
 
-1. frozen acceptance dataset;
-2. adversarial fixtures;
-3. cross-module typed contract;
-4. end-to-end trace id;
-5. OOS/shadow evidence where market quality is claimed;
-6. explicit failure-mode table;
-7. reproducible evidence bundle referenced from README.
+`Edge` содержит:
+
+- src/dst;
+- rate;
+- fee_bps;
+- capacity;
+- slippage_bps;
+- latency_ms;
+- venue.
+
+Executable rate:
+
+[
+r_{exec}
+=
+r
+left(
+1-rac{fee_{bps}+slippage_{bps}}{10000}
+ight)
+]
+
+Нулевая/отрицательная raw rate запрещена.
+
+## 4. 🕸️ MarketGraph
+
+`MarketGraph` реализует:
+
+- adjacency structure;
+- path enumeration до `max_hops`;
+- path executable rate;
+- fair value;
+- cycle search.
+
+Path rate:
+
+[
+R_p=prod_{e in p}r_{exec,e}
+]
+
+Fair value текущей реализации — геометрическое среднее executable rates найденных путей:
+
+[
+FV =
+exp
+left(
+rac{1}{N}
+sum_{p=1}^N ln R_p
+ight)
+]
+
+Это конкретная implemented definition; она не выдаётся за универсальный market microstructure estimator.
+
+## 5. 🔄 Cycle analysis
+
+Для cycle back to start:
+
+[
+edge_{bps}=(R_{cycle}-1)	imes10000
+]
+
+Cycles сортируются по рассчитанному edge descending.
+
+Критическая граница: рассчитанный cycle edge ещё не означает executable profit, если capacity, latency, stale quotes, leg risk или venue constraints не смоделированы полностью.
+
+## 6. 🏗️ Архитектура
+
+```mermaid
+flowchart LR
+    Q[Venue / quote observations] --> E[Executable Edge]
+    E --> G[MarketGraph]
+    G --> P[Path enumeration]
+    P --> FV[Fair value]
+    G --> C[Cycle search]
+    FV --> CONTRACT[fair-value/v1]
+    CONTRACT --> MIDAS[synergy_midas_ai]
+```
+
+## 7. 🔗 Federation contract
+
+```text
+CONTRACT_ID = synergy.trading.fair-value/v1
+AUTHORITY   = market_graph
+```
+
+`fair_value_payload(...)`:
+
+- требует `observation_id`;
+- строит graph из edge dictionaries;
+- считает fair value;
+- reject если executable path отсутствует;
+- возвращает `authorization=false`.
+
+## 8. 📥 Inputs
+
+- observation id;
+- src/dst assets;
+- edge list;
+- rates;
+- fees;
+- slippage;
+- optional capacity/latency/venue;
+- max hops.
+
+## 9. 📤 Outputs
+
+- src/dst;
+- fair value;
+- max hops;
+- observation id;
+- `authorization=false`.
+
+Enterprise API дополнительно может возвращать cycle analysis и request correlation.
+
+## 10. 🛡️ Invariants
+
+```text
+raw quote       != executable quote
+fair value      != order authorization
+cycle edge      != realized arbitrage P&L
+negative rate   -> reject
+no path         -> reject
+graph output    requires timestamp/provenance downstream
+```
+
+## 11. 🧪 Реальные tests
+
+`test_enterprise_product.py` строит fixture:
+
+- USD→EUR;
+- USD→GBP;
+- GBP→EUR;
+- EUR→USD;
+
+и вызывает:
+
+```text
+POST /enterprise/v1/graph/analyze
+```
+
+Тест проверяет:
+
+- response 200 для authorized `researcher`;
+- наличие `fair_value`, `cycles`, `request_id`;
+- audit linkage по request id;
+- `viewer` получает 403;
+- enterprise routes присутствуют.
+
+В repo также есть tests для core, adapters, deployment, foundation, service, release metadata и SYNERGY contracts.
+
+## 12. ⚠️ Modeling limits
+
+Текущая `fair_value()`:
+
+- не weight'ит paths по liquidity/capacity;
+- не устраняет correlated/overlapping paths;
+- не моделирует asynchronous quote time;
+- не применяет execution sequencing;
+- не гарантирует simultaneous fills.
+
+`capacity` и `latency_ms` находятся в Edge model, но core fair-value formula их напрямую не использует.
+
+Это нужно явно учитывать при downstream interpretation.
+
+## 13. 🧪 Required next tests
+
+- stale-edge timestamps;
+- capacity-bound path rate;
+- partial fill;
+- latency-dependent cycle failure;
+- duplicated path sensitivity;
+- venue disconnect;
+- negative/zero executable rate after costs;
+- graph explosion / max-hop bounds;
+- deterministic fixture baselines.
+
+## 14. 🛠️ Воспроизводимость
+
+```bash
+git clone https://github.com/Shtenco/synergy_market_graph.git
+cd synergy_market_graph
+python -m pip install -e .
+pytest -q
+```
+
+Наличие deploy/container assets не означает production runtime без observed deployment evidence.
+
+## 15. 🗺️ Карта repository
+
+| Path | Role |
+|---|---|
+| `src/.../core.py` | graph/path/fair-value/cycle math |
+| `src/.../synergy_contracts.py` | fair-value/v1 payload |
+| `src/.../api.py` | API surface |
+| `src/.../enterprise/` | auth/audit enterprise controls |
+| `tests/` | core/product/service/deployment tests |
+| `Dockerfile` | container build |
+| `deploy/` | deployment assets |
+| `loadtests/` | load testing |
+
+## 16. 🔗 Место в SYNERGY
+
+Producer:
+
+```text
+synergy_market_graph
+  -> synergy.trading.fair-value/v1
+  -> synergy_midas_ai
+```
+
+Это market evidence producer, не execution authority.
+
+## 17. 📊 Evidence maturity
+
+| Layer | Status |
+|---|---|
+| executable graph math | ✅ |
+| fees/slippage in edge rate | ✅ |
+| path/cycle search | ✅ |
+| federation contract | ✅ |
+| enterprise tests | ✅ source |
+| timestamp provenance | incomplete |
+| capacity-aware fair value | incomplete |
+| cross-repo observed E2E | ❌ |
+| realized arbitrage proof | ❌ |
+
+## 18. 🚀 Roadmap
+
+1. timestamp/provenance per edge;
+2. liquidity/capacity weighting;
+3. latency-aware executable graph;
+4. venue sequencing;
+5. robust fair-value alternatives;
+6. strict historical replay;
+7. observed M4 federation evidence.
+
+## 19. 🛑 Что проект НЕ утверждает
+
+- что geometric multi-path mean — «истинная цена»;
+- что найденный cycle исполним;
+- что graph edge гарантирует profit;
+- что API output разрешает сделку;
+- что source tests = production evidence.
+
+---
+
+[🧭 SYNERGY SYSTEM](https://github.com/Shtenco/synergy_system) · [📚 Atlas](https://github.com/Shtenco/synergy_system/blob/main/docs/SYNERGY_REPOSITORY_ATLAS.md)
