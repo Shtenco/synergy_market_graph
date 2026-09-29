@@ -277,6 +277,93 @@ synergy_market_graph
 - что API output разрешает сделку;
 - что source tests = production evidence.
 
+## 20. 🔍 Sensitivity and falsification checklist
+
+A graph fair-value engine can look impressive while being structurally fragile. The following checks should be mandatory before using its output downstream:
+
+### Path duplication sensitivity
+
+If the same economic route is represented twice through duplicated edges, the geometric mean can shift even though the market has not changed. The benchmark should therefore compare:
+
+```text
+original graph
+vs
+graph with duplicated economically-equivalent path
+```
+
+and quantify fair-value drift.
+
+### Capacity sensitivity
+
+Two paths with the same rate but radically different executable capacity should not necessarily receive equal influence in a production fair-value estimator.
+
+Future variants should report both:
+
+- current unweighted geometric fair value;
+- capacity/liquidity-weighted alternative.
+
+### Timestamp sensitivity
+
+Every edge needs:
+
+```text
+observed_at
+source
+venue
+sequence/version
+```
+
+A cross-venue cycle built from stale edges must be marked invalid even if arithmetic edge is positive.
+
+### Cost stress
+
+For each candidate graph snapshot, recompute under:
+
+```text
+fees × {1, 1.5, 2}
+slippage × {1, 2, 4}
+latency penalty scenarios
+```
+
+If a claimed edge disappears under tiny perturbations, it is research-only.
+
+## 21. 📋 Minimum evidence bundle for one fair-value observation
+
+A strong artifact should contain:
+
+```json
+{
+  "observation_id": "...",
+  "captured_at": "...",
+  "src": "USD",
+  "dst": "EUR",
+  "edges_sha256": "...",
+  "max_hops": 3,
+  "path_count": 2,
+  "fair_value": 0.0,
+  "method": "geometric_mean_executable_path_rates",
+  "software_commit": "...",
+  "authorization": false
+}
+```
+
+Plus the raw edge snapshot. Without raw inputs, the fair value cannot be independently recalculated.
+
+## 22. ✅ Promotion gate
+
+Before this repository may be described as an executable institutional market graph, require simultaneously:
+
+- timestamped real/saved venue observations;
+- deterministic replay;
+- capacity-aware route tests;
+- cost sensitivity;
+- stale-quote rejection;
+- graph-size/performance benchmark;
+- observed contract consumer in MIDAS;
+- machine-readable evidence persisted with hashes.
+
+Until then the current code is a strong **graph research/feature producer**, not execution truth.
+
 ---
 
 [🧭 SYNERGY SYSTEM](https://github.com/Shtenco/synergy_system) · [📚 Atlas](https://github.com/Shtenco/synergy_system/blob/main/docs/SYNERGY_REPOSITORY_ATLAS.md)
