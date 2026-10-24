@@ -1,3 +1,9 @@
+<!-- SCIENTIFIC-V4-2026:START -->
+<img src="assets/readme/scientific-architecture-v4.svg" width="100%" alt="MARKET GRAPH / EXECUTABLE LIQUIDITY"/>
+
+[Научно-техническое досье V4](docs/SCIENTIFIC_DOSSIER_V4_2026.md) — математическая модель, архитектура, эксперименты. Исходный README ниже сохранён полностью.
+<!-- SCIENTIFIC-V4-2026:END -->
+
 #  SYNERGY Market Graph — verified technical dossier
 
 > **Статус:**  CANDIDATE — executable graph model, typed fair-value contract, enterprise API and tests exist.
